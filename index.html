@@ -25,6 +25,10 @@
       --line: #dbe0d7;
       --danger: #b93829;
       --danger-soft: #fdf2f0;
+      --success: #15803d;
+      --success-soft: #f0fdf4;
+      --warning: #b45309;
+      --warning-soft: #fffbeb;
       --radius: 8px;
       --gap: 20px;
       --display: "Archivo", system-ui, -apple-system, sans-serif;
@@ -59,7 +63,7 @@
     }
 
     .shell {
-      max-width: 1140px;
+      max-width: 1180px;
       margin: 0 auto;
       padding: max(32px, env(safe-area-inset-top, 32px)) 16px max(32px, env(safe-area-inset-bottom, 32px));
     }
@@ -179,7 +183,7 @@
       color: #ffffff;
     }
 
-    /* Statusbar Bar - Mobile Optimized */
+    /* Statusbar Bar */
     .statusbar {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
@@ -234,6 +238,15 @@
       font-weight: 700;
     }
 
+    .statusbar__budget {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      color: #1e40af;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-weight: 700;
+    }
+
     .statusbar__time {
       grid-column: span 2;
       font-size: 11px;
@@ -244,6 +257,63 @@
         margin-left: auto;
         font-size: 12px;
       }
+    }
+
+    /* Search & Filter Toolbar */
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 14px;
+      background: #ffffff;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .toolbar__search {
+      flex: 1 1 200px;
+      position: relative;
+    }
+
+    .toolbar__search input {
+      width: 100%;
+      padding: 9px 12px 9px 34px;
+      border: 1.5px solid var(--line);
+      border-radius: var(--radius);
+      font-size: 14px;
+      background: #ffffff;
+    }
+
+    .toolbar__search input:focus {
+      border-color: var(--pine);
+    }
+
+    .toolbar__search::before {
+      content: "🔍";
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 13px;
+      pointer-events: none;
+    }
+
+    .toolbar__filter {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      flex: 1 1 auto;
+    }
+
+    .toolbar__filter select {
+      border: 1.5px solid var(--line);
+      border-radius: var(--radius);
+      padding: 9px 10px;
+      font-size: 13px;
+      background: #ffffff;
+      font-weight: 600;
     }
 
     /* Layout & Sidebar Rail */
@@ -287,7 +357,7 @@
       font-weight: 600;
     }
 
-    /* NO-SWIPE Mobile Grid Layout: 2 Columns on mobile, 4 Columns on tablet, 1 Column vertical list on desktop */
+    /* Grid Layout for Divisions (No Swipe) */
     .rail__list {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
@@ -430,6 +500,17 @@
       margin: 4px 0 0;
     }
 
+    .panel__subtotal {
+      font-family: var(--mono);
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--pine);
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      padding: 4px 10px;
+      border-radius: 6px;
+    }
+
     .entry {
       display: grid;
       grid-template-columns: 1fr;
@@ -443,8 +524,8 @@
 
     @media (min-width: 640px) {
       .entry {
-        grid-template-columns: 2fr 100px 1fr 1.3fr auto;
-        gap: 10px;
+        grid-template-columns: 2.2fr 80px 100px 1.2fr 130px 1.3fr auto;
+        gap: 8px;
         padding: 16px;
       }
     }
@@ -469,10 +550,10 @@
     .field select {
       border: 1.5px solid var(--line);
       border-radius: var(--radius);
-      padding: 11px 12px;
+      padding: 10px 10px;
       background: #ffffff;
       width: 100%;
-      font-size: 15px;
+      font-size: 14px;
       transition: border-color 0.15s ease;
       min-height: 44px;
     }
@@ -521,7 +602,7 @@
       width: 100%;
       border-collapse: collapse;
       font-size: 14px;
-      min-width: 540px;
+      min-width: 680px;
     }
 
     th {
@@ -548,7 +629,8 @@
     }
 
     .cell-no,
-    .cell-qty {
+    .cell-qty,
+    .cell-price {
       font-family: var(--mono);
       font-size: 13px;
       font-weight: 600;
@@ -564,6 +646,36 @@
       font-size: 12px;
       color: var(--pine);
       font-weight: 600;
+    }
+
+    /* Status Badges */
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 8px;
+      border-radius: 99px;
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .status-badge--pending {
+      background: var(--danger-soft);
+      color: var(--danger);
+      border: 1px solid #fecaca;
+    }
+
+    .status-badge--process {
+      background: var(--warning-soft);
+      color: var(--warning);
+      border: 1px solid #fde68a;
+    }
+
+    .status-badge--ready {
+      background: var(--success-soft);
+      color: var(--success);
+      border: 1px solid #bbf7d0;
     }
 
     .row-actions {
@@ -693,7 +805,34 @@
       </div>
       <span>Total barang: <strong id="totalItems">0</strong></span>
       <span>Divisi terisi: <strong id="filledDivisions">0 / 8</strong></span>
+      <span class="statusbar__budget">Estimasi Total: <strong id="totalBudget">Rp 0</strong></span>
       <span class="statusbar__time" id="saveStatus">Sinkron otomatis...</span>
+    </div>
+
+    <!-- Search & Filter Toolbar -->
+    <div class="toolbar">
+      <div class="toolbar__search">
+        <input id="searchInput" placeholder="Cari nama barang di semua divisi..." autocomplete="off" />
+      </div>
+      <div class="toolbar__filter">
+        <select id="filterSource">
+          <option value="">Semua Sumber</option>
+          <option value="Inventaris organisasi">Inventaris organisasi</option>
+          <option value="Pinjam sekretariat">Pinjam sekretariat</option>
+          <option value="Pinjam kampus">Pinjam kampus</option>
+          <option value="Pinjam UKM lain">Pinjam UKM lain</option>
+          <option value="Milik panitia">Milik panitia</option>
+          <option value="Sewa">Sewa</option>
+          <option value="Beli">Beli</option>
+          <option value="Pesan katering">Pesan katering</option>
+        </select>
+        <select id="filterStatus">
+          <option value="">Semua Status</option>
+          <option value="Belum Ada">🔴 Belum Ada</option>
+          <option value="Dalam Proses">🟡 Dalam Proses</option>
+          <option value="Sudah Siap">🟢 Sudah Siap</option>
+        </select>
+      </div>
     </div>
 
     <div class="layout">
@@ -710,7 +849,10 @@
             <h2 class="panel__title" id="panelTitle">KETUA</h2>
             <p class="panel__hint" id="panelHint">Memuat data divisi...</p>
           </div>
-          <button class="btn btn--danger" id="clearDivisionButton">Kosongkan Divisi Ini</button>
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <span class="panel__subtotal" id="divisionSubtotal">Subtotal: Rp 0</span>
+            <button class="btn btn--danger" id="clearDivisionButton">Kosongkan Divisi Ini</button>
+          </div>
         </div>
 
         <form id="entryForm" novalidate>
@@ -730,6 +872,18 @@
             <div class="field">
               <label for="itemSource">Sumber</label>
               <select id="itemSource" name="itemSource"></select>
+            </div>
+            <div class="field">
+              <label for="itemPrice">Harga/Satuan (Rp)</label>
+              <input id="itemPrice" name="itemPrice" type="number" min="0" step="500" value="0" placeholder="0" />
+            </div>
+            <div class="field">
+              <label for="itemStatus">Status</label>
+              <select id="itemStatus" name="itemStatus">
+                <option value="Belum Ada">🔴 Belum Ada</option>
+                <option value="Dalam Proses">🟡 Dalam Proses</option>
+                <option value="Sudah Siap">🟢 Sudah Siap</option>
+              </select>
             </div>
             <div class="entry__submit">
               <button class="btn btn--primary" type="submit" id="submitButton">+ Tambah</button>
@@ -792,7 +946,7 @@
       "Pesan katering",
     ];
 
-    const STORAGE_KEY = "mubes_perlengkapan_v2";
+    const STORAGE_KEY = "mubes_perlengkapan_v3";
     const SHEET_NAME = "Data Peminjaman";
     const SHEET_TITLE = "RENCANA ANGGARAN PELAKSANAAN PERLENGKAPAN MUBES";
 
@@ -812,7 +966,10 @@
       items: createEmptyItems(),
       activeDivision: DIVISIONS[0],
       editingId: null,
-      isOnline: true
+      isOnline: true,
+      searchQuery: "",
+      filterSource: "",
+      filterStatus: ""
     };
 
     const elements = {
@@ -825,14 +982,29 @@
       itemQuantity: document.getElementById("itemQuantity"),
       itemUnit: document.getElementById("itemUnit"),
       itemSource: document.getElementById("itemSource"),
+      itemPrice: document.getElementById("itemPrice"),
+      itemStatus: document.getElementById("itemStatus"),
       submitButton: document.getElementById("submitButton"),
       cancelEditButton: document.getElementById("cancelEditButton"),
       entryError: document.getElementById("entryError"),
       totalItems: document.getElementById("totalItems"),
       filledDivisions: document.getElementById("filledDivisions"),
+      totalBudget: document.getElementById("totalBudget"),
+      divisionSubtotal: document.getElementById("divisionSubtotal"),
       saveStatus: document.getElementById("saveStatus"),
       cloudStatus: document.getElementById("cloudStatus"),
+      searchInput: document.getElementById("searchInput"),
+      filterSource: document.getElementById("filterSource"),
+      filterStatus: document.getElementById("filterStatus"),
       toast: document.getElementById("toast"),
+    };
+
+    const formatRupiah = (number) => {
+      return new Intl.NumberFormat("id-ID", {
+        style: "currency",
+        currency: "IDR",
+        maximumFractionDigits: 0
+      }).format(number || 0);
     };
 
     // Cloud Persistence with Supabase & LocalStorage Fallback
@@ -840,7 +1012,7 @@
       async load() {
         try {
           const res = await fetch(
-            `${SUPABASE_URL}/rest/v1/wishes?name=eq.MUBES_DATA_V1&order=id.desc&limit=1`,
+            `${SUPABASE_URL}/rest/v1/wishes?name=eq.MUBES_DATA_V2&order=id.desc&limit=1`,
             { headers: SB_HEADERS }
           );
           if (res.ok) {
@@ -877,7 +1049,7 @@
             method: "POST",
             headers: { ...SB_HEADERS, "Prefer": "return=minimal" },
             body: JSON.stringify({
-              name: "MUBES_DATA_V1",
+              name: "MUBES_DATA_V2",
               message: JSON.stringify(items)
             })
           });
@@ -896,10 +1068,48 @@
     const countAllItems = () =>
       DIVISIONS.reduce((total, division) => total + (state.items[division] ? state.items[division].length : 0), 0);
 
+    const calculateGrandTotal = () => {
+      let total = 0;
+      DIVISIONS.forEach((div) => {
+        (state.items[div] || []).forEach((item) => {
+          total += (item.price || 0) * (item.quantity || 1);
+        });
+      });
+      return total;
+    };
+
+    const calculateDivisionTotal = (division) => {
+      let total = 0;
+      (state.items[division] || []).forEach((item) => {
+        total += (item.price || 0) * (item.quantity || 1);
+      });
+      return total;
+    };
+
     const countFilledDivisions = () =>
       DIVISIONS.filter((division) => state.items[division] && state.items[division].length > 0).length;
 
-    const activeItems = () => state.items[state.activeDivision] || [];
+    const activeItems = () => {
+      let list = state.items[state.activeDivision] || [];
+      
+      // Apply Search Filter
+      if (state.searchQuery) {
+        const q = state.searchQuery.toLowerCase();
+        list = list.filter((item) => item.name.toLowerCase().includes(q));
+      }
+
+      // Apply Source Filter
+      if (state.filterSource) {
+        list = list.filter((item) => item.source === state.filterSource);
+      }
+
+      // Apply Status Filter
+      if (state.filterStatus) {
+        list = list.filter((item) => (item.status || "Belum Ada") === state.filterStatus);
+      }
+
+      return list;
+    };
 
     function fillSelect(select, options) {
       select.innerHTML = options
@@ -940,30 +1150,47 @@
       elements.rail.innerHTML = railItems;
     }
 
+    function getStatusBadge(status) {
+      const s = status || "Belum Ada";
+      if (s === "Sudah Siap") {
+        return `<span class="status-badge status-badge--ready">🟢 Sudah Siap</span>`;
+      }
+      if (s === "Dalam Proses") {
+        return `<span class="status-badge status-badge--process">🟡 Dalam Proses</span>`;
+      }
+      return `<span class="status-badge status-badge--pending">🔴 Belum Ada</span>`;
+    }
+
     function renderTable() {
       const items = activeItems();
 
       if (items.length === 0) {
         elements.tableWrap.innerHTML =
-          `<p class="empty">Belum ada barang untuk divisi <strong>${state.activeDivision}</strong>.<br>Tambahkan barang melalui formulir di atas.</p>`;
+          `<p class="empty">Belum ada barang untuk divisi <strong>${state.activeDivision}</strong> yang sesuai filter.<br>Tambahkan barang baru atau ubah kata kunci pencarian.</p>`;
         return;
       }
 
       const rows = items
         .map(
-          (item, index) => `
-          <tr>
-            <td class="cell-no">${index + 1}</td>
-            <td><strong>${escapeHtml(item.name)}</strong></td>
-            <td class="cell-qty">${item.quantity} ${escapeHtml(item.unit)}</td>
-            <td><span class="source-badge">${escapeHtml(item.source)}</span></td>
-            <td>
-              <span class="row-actions">
-                <button type="button" data-action="edit" data-id="${item.id}">✏️ Ubah</button>
-                <button type="button" class="is-danger" data-action="delete" data-id="${item.id}">🗑️ Hapus</button>
-              </span>
-            </td>
-          </tr>`
+          (item, index) => {
+            const rowTotal = (item.price || 0) * (item.quantity || 1);
+            return `
+            <tr>
+              <td class="cell-no">${index + 1}</td>
+              <td><strong>${escapeHtml(item.name)}</strong></td>
+              <td class="cell-qty">${item.quantity} ${escapeHtml(item.unit)}</td>
+              <td><span class="source-badge">${escapeHtml(item.source)}</span></td>
+              <td class="cell-price">${formatRupiah(item.price || 0)}</td>
+              <td class="cell-price"><strong>${formatRupiah(rowTotal)}</strong></td>
+              <td>${getStatusBadge(item.status)}</td>
+              <td>
+                <span class="row-actions">
+                  <button type="button" data-action="edit" data-id="${item.id}">✏️ Ubah</button>
+                  <button type="button" class="is-danger" data-action="delete" data-id="${item.id}">🗑️ Hapus</button>
+                </span>
+              </td>
+            </tr>`;
+          }
         )
         .join("");
 
@@ -971,11 +1198,14 @@
         <table>
           <thead>
             <tr>
-              <th style="width:48px">No</th>
+              <th style="width:40px">No</th>
               <th>Nama Barang</th>
-              <th style="width:130px">Jumlah</th>
-              <th style="width:180px">Sumber</th>
-              <th style="width:140px; text-align:right;">Aksi</th>
+              <th style="width:110px">Jumlah</th>
+              <th style="width:150px">Sumber</th>
+              <th style="width:130px">Harga Satuan</th>
+              <th style="width:130px">Total Biaya</th>
+              <th style="width:130px">Status Kesiapan</th>
+              <th style="width:130px; text-align:right;">Aksi</th>
             </tr>
           </thead>
           <tbody>${rows}</tbody>
@@ -996,13 +1226,18 @@
       elements.panelHint.textContent =
         count === 0
           ? "Belum ada barang yang dicatat."
-          : `${count} barang dicatat untuk divisi ini.`;
+          : `${count} barang ditampilkan untuk divisi ini.`;
+      
+      const subtotal = calculateDivisionTotal(state.activeDivision);
+      elements.divisionSubtotal.textContent = `Subtotal: ${formatRupiah(subtotal)}`;
+
       renderTable();
     }
 
     function renderSummary() {
       elements.totalItems.textContent = countAllItems();
       elements.filledDivisions.textContent = `${countFilledDivisions()} / ${DIVISIONS.length}`;
+      elements.totalBudget.textContent = formatRupiah(calculateGrandTotal());
     }
 
     function render() {
@@ -1015,6 +1250,8 @@
       state.editingId = null;
       elements.entryForm.reset();
       elements.itemQuantity.value = 1;
+      elements.itemPrice.value = 0;
+      elements.itemStatus.value = "Belum Ada";
       elements.entryError.textContent = "";
       elements.submitButton.textContent = "+ Tambah";
       elements.cancelEditButton.hidden = true;
@@ -1026,6 +1263,8 @@
         quantity: Number(elements.itemQuantity.value),
         unit: elements.itemUnit.value,
         source: elements.itemSource.value,
+        price: Number(elements.itemPrice.value) || 0,
+        status: elements.itemStatus.value || "Belum Ada"
       };
     }
 
@@ -1036,7 +1275,7 @@
     }
 
     function startEditing(id) {
-      const item = activeItems().find((candidate) => candidate.id === id);
+      const item = (state.items[state.activeDivision] || []).find((candidate) => candidate.id === id);
       if (!item) return;
 
       state.editingId = id;
@@ -1044,6 +1283,8 @@
       elements.itemQuantity.value = item.quantity;
       elements.itemUnit.value = item.unit;
       elements.itemSource.value = item.source;
+      elements.itemPrice.value = item.price || 0;
+      elements.itemStatus.value = item.status || "Belum Ada";
       elements.submitButton.textContent = "💾 Simpan";
       elements.cancelEditButton.hidden = false;
       elements.itemName.focus();
@@ -1051,7 +1292,7 @@
 
     async function deleteItem(id) {
       if (!confirm("Hapus barang ini dari divisi " + state.activeDivision + "?")) return;
-      state.items[state.activeDivision] = activeItems().filter((item) => item.id !== id);
+      state.items[state.activeDivision] = (state.items[state.activeDivision] || []).filter((item) => item.id !== id);
       if (state.editingId === id) resetForm();
       render();
       await persist("Barang dihapus");
@@ -1072,7 +1313,7 @@
       }
 
       if (state.editingId) {
-        state.items[state.activeDivision] = activeItems().map((item) =>
+        state.items[state.activeDivision] = state.items[state.activeDivision].map((item) =>
           item.id === state.editingId ? { ...item, ...values } : item
         );
         resetForm();
@@ -1101,7 +1342,7 @@
     }
 
     async function clearActiveDivision() {
-      if (activeItems().length === 0) return;
+      if ((state.items[state.activeDivision] || []).length === 0) return;
       const confirmed = window.confirm(`Kosongkan seluruh barang di divisi ${state.activeDivision}?`);
       if (!confirmed) return;
 
@@ -1112,24 +1353,36 @@
     }
 
     function buildSheetMatrix() {
-      const matrix = [[], [SHEET_TITLE], ["NO", "NAMA BARANG", "JUMLAH BARANG", "SUMBER"]];
+      const matrix = [[], [SHEET_TITLE], ["NO", "NAMA BARANG", "JUMLAH BARANG", "SUMBER", "HARGA SATUAN", "TOTAL BIAYA", "STATUS KESIAPAN"]];
       const merges = [
-        { s: { r: 1, c: 0 }, e: { r: 1, c: 3 } },
+        { s: { r: 1, c: 0 }, e: { r: 1, c: 6 } },
         { s: { r: 2, c: 0 }, e: { r: 2, c: 0 } },
       ];
 
       DIVISIONS.forEach((division) => {
         merges.push({
           s: { r: matrix.length, c: 0 },
-          e: { r: matrix.length, c: 3 },
+          e: { r: matrix.length, c: 6 },
         });
         matrix.push([division]);
 
         const items = state.items[division] || [];
         items.forEach((item, index) => {
-          matrix.push([index + 1, item.name, `${item.quantity} ${item.unit}`, item.source]);
+          const rowTotal = (item.price || 0) * (item.quantity || 1);
+          matrix.push([
+            index + 1,
+            item.name,
+            `${item.quantity} ${item.unit}`,
+            item.source,
+            formatRupiah(item.price || 0),
+            formatRupiah(rowTotal),
+            item.status || "Belum Ada"
+          ]);
         });
       });
+
+      matrix.push([]);
+      matrix.push(["ESTIMASI TOTAL ANGGARAN PERLENGKAPAN MUBES", "", "", "", "", formatRupiah(calculateGrandTotal()), ""]);
 
       return { matrix, merges };
     }
@@ -1151,7 +1404,7 @@
 
       const { matrix, merges } = buildSheetMatrix();
       const sheet = XLSX.utils.aoa_to_sheet(matrix);
-      sheet["!cols"] = [{ wch: 6 }, { wch: 40 }, { wch: 20 }, { wch: 26 }];
+      sheet["!cols"] = [{ wch: 6 }, { wch: 36 }, { wch: 18 }, { wch: 24 }, { wch: 18 }, { wch: 18 }, { wch: 16 }];
       sheet["!merges"] = merges;
 
       const book = XLSX.utils.book_new();
@@ -1167,12 +1420,22 @@
       }
 
       const escapeCell = (value) => `"${String(value).replace(/"/g, '""')}"`;
-      const lines = [["DIVISI", "NO", "NAMA BARANG", "JUMLAH BARANG", "SUMBER"]];
+      const lines = [["DIVISI", "NO", "NAMA BARANG", "JUMLAH BARANG", "SUMBER", "HARGA SATUAN", "TOTAL BIAYA", "STATUS KESIAPAN"]];
 
       DIVISIONS.forEach((division) => {
         const items = state.items[division] || [];
         items.forEach((item, index) => {
-          lines.push([division, index + 1, item.name, `${item.quantity} ${item.unit}`, item.source]);
+          const rowTotal = (item.price || 0) * (item.quantity || 1);
+          lines.push([
+            division,
+            index + 1,
+            item.name,
+            `${item.quantity} ${item.unit}`,
+            item.source,
+            formatRupiah(item.price || 0),
+            formatRupiah(rowTotal),
+            item.status || "Belum Ada"
+          ]);
         });
       });
 
@@ -1239,6 +1502,22 @@
       document.getElementById("exportCsvButton").addEventListener("click", exportCsv);
       document.getElementById("previousDivisionButton").addEventListener("click", () => shiftDivision(-1));
       document.getElementById("nextDivisionButton").addEventListener("click", () => shiftDivision(1));
+
+      // Toolbar Search & Filters
+      elements.searchInput.addEventListener("input", (e) => {
+        state.searchQuery = e.target.value;
+        renderPanel();
+      });
+
+      elements.filterSource.addEventListener("change", (e) => {
+        state.filterSource = e.target.value;
+        renderPanel();
+      });
+
+      elements.filterStatus.addEventListener("change", (e) => {
+        state.filterStatus = e.target.value;
+        renderPanel();
+      });
 
       await restoreSavedItems();
       render();
