@@ -2,6 +2,8 @@
 
 Aplikasi web interaktif dan kolaboratif untuk membantu Panitia Musyawarah Besar (MUBES) mencatat, mengelola, dan merekapitulasi kebutuhan perlengkapan serta rencana anggaran biaya per divisi secara real-time.
 
+![Preview Tampilan Aplikasi Rencana Anggaran MUBES](preview.png)
+
 🌐 **Situs Live**: [https://emzyjeppp.github.io/form-perlengkapan-mubes/](https://emzyjeppp.github.io/form-perlengkapan-mubes/)
 
 ---
