@@ -662,6 +662,18 @@
       white-space: nowrap;
     }
 
+    .division-badge {
+      display: inline-block;
+      background: var(--pine);
+      color: #ffffff;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-family: var(--mono);
+      font-weight: 700;
+      letter-spacing: 0.05em;
+    }
+
     .source-badge {
       display: inline-block;
       background: #edf1e8;
@@ -991,6 +1003,7 @@
       items: createEmptyItems(),
       activeDivision: DIVISIONS[0],
       editingId: null,
+      editingDivision: null,
       isOnline: true,
       searchQuery: "",
       filterSource: "",
@@ -1090,6 +1103,8 @@
 
     const createId = () => `item-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
 
+    const isSearchMode = () => Boolean(state.searchQuery.trim());
+
     const countAllItems = () =>
       DIVISIONS.reduce((total, division) => total + (state.items[division] ? state.items[division].length : 0), 0);
 
@@ -1114,13 +1129,24 @@
     const countFilledDivisions = () =>
       DIVISIONS.filter((division) => state.items[division] && state.items[division].length > 0).length;
 
+    // GLOBAL SEARCH ACROSS ALL DIVISIONS WHEN SEARCHING!
     const activeItems = () => {
-      let list = state.items[state.activeDivision] || [];
-      
-      // Apply Search Filter
-      if (state.searchQuery) {
-        const q = state.searchQuery.toLowerCase();
-        list = list.filter((item) => item.name.toLowerCase().includes(q));
+      let list = [];
+
+      if (isSearchMode()) {
+        const q = state.searchQuery.trim().toLowerCase();
+        DIVISIONS.forEach((division) => {
+          (state.items[division] || []).forEach((item) => {
+            if (item.name.toLowerCase().includes(q)) {
+              list.push({ ...item, itemDivision: division });
+            }
+          });
+        });
+      } else {
+        list = (state.items[state.activeDivision] || []).map((item) => ({
+          ...item,
+          itemDivision: state.activeDivision
+        }));
       }
 
       // Apply Source Filter
@@ -1162,9 +1188,10 @@
     function renderRail() {
       const railItems = DIVISIONS.map((division) => {
         const count = state.items[division] ? state.items[division].length : 0;
+        const isCurrent = !isSearchMode() && division === state.activeDivision;
         return `
           <button class="division" type="button" data-division="${division}"
-                  aria-current="${division === state.activeDivision}">
+                  aria-current="${isCurrent}">
             <span class="division__row">
               <span class="division__name">${division}</span>
               <span class="division__count">${count} barang</span>
@@ -1188,10 +1215,16 @@
 
     function renderTable() {
       const items = activeItems();
+      const inSearch = isSearchMode();
 
       if (items.length === 0) {
-        elements.tableWrap.innerHTML =
-          `<p class="empty">Belum ada barang untuk divisi <strong>${state.activeDivision}</strong> yang sesuai filter.<br>Tambahkan barang baru atau ubah kata kunci pencarian.</p>`;
+        if (inSearch) {
+          elements.tableWrap.innerHTML =
+            `<p class="empty">Tidak ditemukan barang yang cocok dengan kata kunci <strong>"${escapeHtml(state.searchQuery)}"</strong> di divisi mana pun.</p>`;
+        } else {
+          elements.tableWrap.innerHTML =
+            `<p class="empty">Belum ada barang untuk divisi <strong>${state.activeDivision}</strong> yang sesuai filter.<br>Tambahkan barang baru melalui formulir di atas.</p>`;
+        }
         return;
       }
 
@@ -1202,6 +1235,7 @@
             return `
             <tr>
               <td class="cell-no">${index + 1}</td>
+              ${inSearch ? `<td><span class="division-badge">${item.itemDivision}</span></td>` : ''}
               <td><strong>${escapeHtml(item.name)}</strong></td>
               <td class="cell-qty">${item.quantity} ${escapeHtml(item.unit)}</td>
               <td><span class="source-badge">${escapeHtml(item.source)}</span></td>
@@ -1210,8 +1244,8 @@
               <td>${getStatusBadge(item.status)}</td>
               <td>
                 <span class="row-actions">
-                  <button type="button" data-action="edit" data-id="${item.id}">✏️ Ubah</button>
-                  <button type="button" class="is-danger" data-action="delete" data-id="${item.id}">🗑️ Hapus</button>
+                  <button type="button" data-action="edit" data-id="${item.id}" data-division="${item.itemDivision}">✏️ Ubah</button>
+                  <button type="button" class="is-danger" data-action="delete" data-id="${item.id}" data-division="${item.itemDivision}">🗑️ Hapus</button>
                 </span>
               </td>
             </tr>`;
@@ -1224,6 +1258,7 @@
           <thead>
             <tr>
               <th style="width:40px">No</th>
+              ${inSearch ? `<th style="width:130px">Divisi</th>` : ''}
               <th>Nama Barang</th>
               <th style="width:110px">Jumlah</th>
               <th style="width:150px">Sumber</th>
@@ -1246,15 +1281,28 @@
     }
 
     function renderPanel() {
-      const count = activeItems().length;
-      elements.panelTitle.textContent = state.activeDivision;
-      elements.panelHint.textContent =
-        count === 0
-          ? "Belum ada barang yang dicatat."
-          : `${count} barang ditampilkan untuk divisi ini.`;
+      const items = activeItems();
+      const count = items.length;
       
-      const subtotal = calculateDivisionTotal(state.activeDivision);
-      elements.divisionSubtotal.textContent = `Subtotal: ${formatRupiah(subtotal)}`;
+      if (isSearchMode()) {
+        elements.panelTitle.textContent = `🔍 HASIL PENCARIAN: "${state.searchQuery}"`;
+        elements.panelHint.textContent = `Menampilkan ${count} barang dari seluruh divisi yang cocok.`;
+        
+        let searchTotal = 0;
+        items.forEach((item) => {
+          searchTotal += (item.price || 0) * (item.quantity || 1);
+        });
+        elements.divisionSubtotal.textContent = `Total Hasil Cari: ${formatRupiah(searchTotal)}`;
+      } else {
+        elements.panelTitle.textContent = state.activeDivision;
+        elements.panelHint.textContent =
+          count === 0
+            ? "Belum ada barang yang dicatat."
+            : `${count} barang ditampilkan untuk divisi ini.`;
+        
+        const subtotal = calculateDivisionTotal(state.activeDivision);
+        elements.divisionSubtotal.textContent = `Subtotal: ${formatRupiah(subtotal)}`;
+      }
 
       renderTable();
     }
@@ -1273,6 +1321,7 @@
 
     function resetForm() {
       state.editingId = null;
+      state.editingDivision = null;
       elements.entryForm.reset();
       elements.itemQuantity.value = 1;
       elements.itemPrice.value = 0;
@@ -1299,11 +1348,15 @@
       return "";
     }
 
-    function startEditing(id) {
-      const item = (state.items[state.activeDivision] || []).find((candidate) => candidate.id === id);
+    function startEditing(id, division) {
+      const targetDiv = division || state.activeDivision;
+      const item = (state.items[targetDiv] || []).find((candidate) => candidate.id === id);
       if (!item) return;
 
+      state.activeDivision = targetDiv;
       state.editingId = id;
+      state.editingDivision = targetDiv;
+      
       elements.itemName.value = item.name;
       elements.itemQuantity.value = item.quantity;
       elements.itemUnit.value = item.unit;
@@ -1312,12 +1365,14 @@
       elements.itemStatus.value = item.status || "Belum Ada";
       elements.submitButton.textContent = "💾 Simpan";
       elements.cancelEditButton.hidden = false;
+      render();
       elements.itemName.focus();
     }
 
-    async function deleteItem(id) {
-      if (!confirm("Hapus barang ini dari divisi " + state.activeDivision + "?")) return;
-      state.items[state.activeDivision] = (state.items[state.activeDivision] || []).filter((item) => item.id !== id);
+    async function deleteItem(id, division) {
+      const targetDiv = division || state.activeDivision;
+      if (!confirm("Hapus barang ini dari divisi " + targetDiv + "?")) return;
+      state.items[targetDiv] = (state.items[targetDiv] || []).filter((item) => item.id !== id);
       if (state.editingId === id) resetForm();
       render();
       await persist("Barang dihapus");
@@ -1333,12 +1388,14 @@
         return;
       }
 
-      if (!state.items[state.activeDivision]) {
-        state.items[state.activeDivision] = [];
+      const targetDiv = state.editingDivision || state.activeDivision;
+
+      if (!state.items[targetDiv]) {
+        state.items[targetDiv] = [];
       }
 
       if (state.editingId) {
-        state.items[state.activeDivision] = state.items[state.activeDivision].map((item) =>
+        state.items[targetDiv] = state.items[targetDiv].map((item) =>
           item.id === state.editingId ? { ...item, ...values } : item
         );
         resetForm();
@@ -1347,7 +1404,7 @@
         return;
       }
 
-      state.items[state.activeDivision].push({ id: createId(), ...values });
+      state.items[targetDiv].push({ id: createId(), ...values });
       resetForm();
       render();
       elements.itemName.focus();
@@ -1355,6 +1412,8 @@
     }
 
     function selectDivision(division) {
+      state.searchQuery = "";
+      elements.searchInput.value = "";
       state.activeDivision = division;
       resetForm();
       render();
@@ -1477,8 +1536,8 @@
     function handleTableClick(event) {
       const button = event.target.closest("[data-action]");
       if (!button) return;
-      if (button.dataset.action === "edit") startEditing(button.dataset.id);
-      if (button.dataset.action === "delete") deleteItem(button.dataset.id);
+      if (button.dataset.action === "edit") startEditing(button.dataset.id, button.dataset.division);
+      if (button.dataset.action === "delete") deleteItem(button.dataset.id, button.dataset.division);
     }
 
     async function restoreSavedItems() {
