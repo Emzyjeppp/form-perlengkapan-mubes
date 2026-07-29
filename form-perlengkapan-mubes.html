@@ -1,0 +1,1259 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Perlengkapan MUBES — Formulir Rencana Anggaran</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=IBM+Plex+Mono:wght@400;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+    rel="stylesheet"
+  />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+  <style>
+    :root {
+      --paper: #f4f6f0;
+      --panel: #ffffff;
+      --ink: #17231d;
+      --ink-soft: #5a6a62;
+      --pine: #2e4a3f;
+      --pine-light: #3d6153;
+      --amber: #e0a21a;
+      --amber-soft: #fcf5e5;
+      --line: #dbe0d7;
+      --danger: #b93829;
+      --danger-soft: #fdf2f0;
+      --radius: 8px;
+      --gap: 20px;
+      --display: "Archivo", system-ui, -apple-system, sans-serif;
+      --body: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+      --shadow: 0 4px 20px rgba(23, 35, 29, 0.06);
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      margin: 0;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: var(--body);
+      font-size: 15px;
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+
+    button, input, select, textarea {
+      font: inherit;
+      color: inherit;
+    }
+
+    :focus-visible {
+      outline: 2px solid var(--pine);
+      outline-offset: 2px;
+    }
+
+    .shell {
+      max-width: 1140px;
+      margin: 0 auto;
+      padding: 24px 16px 64px;
+    }
+
+    /* Masthead Header */
+    .masthead {
+      border-bottom: 2px solid var(--ink);
+      padding-bottom: 18px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .masthead__eyebrow {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--pine);
+      font-weight: 600;
+      margin: 0 0 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .masthead__title {
+      font-family: var(--display);
+      font-weight: 800;
+      font-size: clamp(22px, 5vw, 36px);
+      line-height: 1.05;
+      letter-spacing: -0.02em;
+      text-transform: uppercase;
+      margin: 0;
+    }
+
+    .masthead__title span {
+      display: block;
+      color: var(--pine);
+    }
+
+    .masthead__actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      width: 100%;
+    }
+
+    @media (min-width: 640px) {
+      .masthead__actions {
+        width: auto;
+      }
+    }
+
+    .btn {
+      border: 1.5px solid var(--ink);
+      background: #ffffff;
+      padding: 10px 16px;
+      border-radius: var(--radius);
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 14px;
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      min-height: 44px;
+      touch-action: manipulation;
+    }
+
+    .btn:hover {
+      background: var(--ink);
+      color: var(--panel);
+      transform: translateY(-1px);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    .btn--primary {
+      background: var(--amber);
+      border-color: var(--ink);
+      color: var(--ink);
+    }
+
+    .btn--primary:hover {
+      background: var(--ink);
+      color: var(--amber);
+    }
+
+    .btn--quiet {
+      border-color: var(--line);
+      color: var(--ink-soft);
+      background: transparent;
+    }
+
+    .btn--quiet:hover {
+      background: var(--line);
+      color: var(--ink);
+    }
+
+    .btn--danger {
+      border-color: var(--danger);
+      color: var(--danger);
+      background: var(--danger-soft);
+    }
+
+    .btn--danger:hover {
+      background: var(--danger);
+      color: #ffffff;
+    }
+
+    /* Statusbar Bar */
+    .statusbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 20px;
+      align-items: center;
+      padding: 12px 0;
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--ink-soft);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .statusbar__badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--amber-soft);
+      padding: 4px 10px;
+      border-radius: 99px;
+      color: var(--ink);
+      font-weight: 600;
+    }
+
+    .statusbar__pulse {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #22c55e;
+      box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
+      70% { box-shadow: 0 0 0 6px rgba(34, 197, 94, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+    }
+
+    .statusbar strong {
+      color: var(--ink);
+      font-weight: 700;
+    }
+
+    /* Layout & Sidebar Rail */
+    .layout {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: var(--gap);
+      margin-top: 18px;
+      align-items: start;
+    }
+
+    @media (min-width: 860px) {
+      .layout {
+        grid-template-columns: 260px 1fr;
+      }
+    }
+
+    .rail {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 10px;
+      box-shadow: var(--shadow);
+    }
+
+    @media (min-width: 860px) {
+      .rail {
+        position: sticky;
+        top: 16px;
+      }
+    }
+
+    .rail__caption {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--ink-soft);
+      padding: 6px 8px 10px;
+      margin: 0;
+      font-weight: 600;
+    }
+
+    .rail__list {
+      display: flex;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      gap: 6px;
+      padding-bottom: 4px;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: thin;
+    }
+
+    @media (min-width: 860px) {
+      .rail__list {
+        flex-direction: column;
+        overflow-x: visible;
+        padding-bottom: 0;
+      }
+    }
+
+    .division {
+      flex: 0 0 auto;
+      width: 145px;
+      text-align: left;
+      background: #f8faf6;
+      border: 1.5px solid var(--line);
+      border-radius: var(--radius);
+      padding: 10px 12px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      touch-action: manipulation;
+    }
+
+    @media (min-width: 860px) {
+      .division {
+        width: 100%;
+        border-left: 4px solid transparent;
+        border-top: none;
+        border-right: none;
+        border-bottom: none;
+        border-radius: var(--radius);
+        background: transparent;
+      }
+    }
+
+    .division:hover {
+      background: #eff3ea;
+    }
+
+    .division[aria-current="true"] {
+      background: var(--pine);
+      border-color: var(--pine);
+      color: #ffffff;
+    }
+
+    @media (min-width: 860px) {
+      .division[aria-current="true"] {
+        border-left-color: var(--amber);
+        background: var(--pine);
+      }
+    }
+
+    .division[aria-current="true"] .division__name,
+    .division[aria-current="true"] .division__count {
+      color: #ffffff;
+    }
+
+    .division__row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 6px;
+    }
+
+    .division__name {
+      font-family: var(--display);
+      font-weight: 700;
+      font-size: 13px;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+    }
+
+    .division__count {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--ink-soft);
+      font-weight: 600;
+    }
+
+    .meter {
+      display: flex;
+      gap: 3px;
+      margin-top: 8px;
+    }
+
+    .meter__tick {
+      height: 4px;
+      flex: 1;
+      background: var(--line);
+      border-radius: 2px;
+    }
+
+    .meter__tick--filled {
+      background: var(--amber);
+    }
+
+    .division[aria-current="true"] .meter__tick {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    .division[aria-current="true"] .meter__tick--filled {
+      background: var(--amber);
+    }
+
+    /* Main Panel & Forms */
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 18px;
+      box-shadow: var(--shadow);
+    }
+
+    @media (min-width: 640px) {
+      .panel {
+        padding: 24px;
+      }
+    }
+
+    .panel__head {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1.5px solid var(--line);
+      padding-bottom: 14px;
+      margin-bottom: 20px;
+    }
+
+    .panel__title {
+      font-family: var(--display);
+      font-weight: 800;
+      font-size: 22px;
+      letter-spacing: -0.01em;
+      text-transform: uppercase;
+      margin: 0;
+      color: var(--pine);
+    }
+
+    .panel__hint {
+      font-size: 13px;
+      color: var(--ink-soft);
+      margin: 4px 0 0;
+    }
+
+    .entry {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+      align-items: end;
+      background: #f9fbf7;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+    }
+
+    @media (min-width: 640px) {
+      .entry {
+        grid-template-columns: 2fr 100px 1fr 1.3fr auto;
+        gap: 10px;
+      }
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      min-width: 0;
+    }
+
+    .field label {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--ink-soft);
+      font-weight: 600;
+    }
+
+    .field input,
+    .field select {
+      border: 1.5px solid var(--line);
+      border-radius: var(--radius);
+      padding: 11px 12px;
+      background: #ffffff;
+      width: 100%;
+      font-size: 15px;
+      transition: border-color 0.15s ease;
+      min-height: 44px;
+    }
+
+    .field input:focus,
+    .field select:focus {
+      border-color: var(--pine);
+    }
+
+    .entry__submit {
+      display: flex;
+      gap: 8px;
+      width: 100%;
+      margin-top: 4px;
+    }
+
+    @media (min-width: 640px) {
+      .entry__submit {
+        width: auto;
+        margin-top: 0;
+      }
+    }
+
+    .entry__submit .btn {
+      flex: 1;
+    }
+
+    .entry__error {
+      color: var(--danger);
+      font-size: 13px;
+      margin: 10px 0 0;
+      min-height: 20px;
+      font-weight: 600;
+    }
+
+    /* Table & Card List */
+    .table-wrap {
+      margin-top: 18px;
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+      min-width: 580px;
+    }
+
+    th {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--ink-soft);
+      text-align: left;
+      padding: 12px 14px;
+      background: #f1f4ed;
+      border-bottom: 1.5px solid var(--ink);
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--line);
+      vertical-align: middle;
+    }
+
+    tr:nth-child(even) td {
+      background: #fafbf8;
+    }
+
+    .cell-no,
+    .cell-qty {
+      font-family: var(--mono);
+      font-size: 13px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .source-badge {
+      display: inline-block;
+      background: #edf1e8;
+      border: 1px solid #d4dccf;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      color: var(--pine);
+      font-weight: 600;
+    }
+
+    .row-actions {
+      display: flex;
+      gap: 6px;
+      justify-content: flex-end;
+    }
+
+    .row-actions button {
+      border: 1px solid var(--line);
+      background: #ffffff;
+      border-radius: var(--radius);
+      padding: 6px 12px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      min-height: 36px;
+      touch-action: manipulation;
+    }
+
+    .row-actions button:hover {
+      background: var(--ink);
+      color: #ffffff;
+      border-color: var(--ink);
+    }
+
+    .row-actions .is-danger {
+      color: var(--danger);
+      background: var(--danger-soft);
+      border-color: #f7d2cd;
+    }
+
+    .row-actions .is-danger:hover {
+      background: var(--danger);
+      color: #ffffff;
+      border-color: var(--danger);
+    }
+
+    .empty {
+      border: 2px dashed var(--line);
+      border-radius: var(--radius);
+      padding: 36px 20px;
+      text-align: center;
+      color: var(--ink-soft);
+      font-size: 14px;
+      margin-top: 18px;
+    }
+
+    .panel__foot {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: 20px;
+      padding-top: 16px;
+      border-top: 1.5px solid var(--line);
+    }
+
+    .panel__foot .btn {
+      flex: 1;
+    }
+
+    @media (min-width: 640px) {
+      .panel__foot .btn {
+        flex: 0 0 auto;
+      }
+    }
+
+    /* Toast notification */
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 24px;
+      transform: translateX(-50%) translateY(160%);
+      background: var(--ink);
+      color: #ffffff;
+      padding: 12px 22px;
+      border-radius: 99px;
+      font-size: 14px;
+      font-weight: 600;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+      transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: max-content;
+      max-width: 90vw;
+      text-align: center;
+    }
+
+    .toast--visible {
+      transform: translateX(-50%) translateY(0);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        transition: none !important;
+        animation: none !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="shell">
+    <header class="masthead">
+      <div>
+        <p class="masthead__eyebrow">
+          <span>🏛️</span> Panitia Musyawarah Besar (MUBES)
+        </p>
+        <h1 class="masthead__title">
+          Rencana Anggaran
+          <span>Perlengkapan MUBES</span>
+        </h1>
+      </div>
+      <div class="masthead__actions">
+        <button class="btn" id="exportCsvButton">📥 Unduh CSV</button>
+        <button class="btn btn--primary" id="exportExcelButton">📊 Unduh Excel</button>
+      </div>
+    </header>
+
+    <div class="statusbar">
+      <div class="statusbar__badge">
+        <span class="statusbar__pulse"></span>
+        <span id="cloudStatus">Terhubung ke Cloud</span>
+      </div>
+      <span>Total barang: <strong id="totalItems">0</strong></span>
+      <span>Divisi terisi: <strong id="filledDivisions">0 / 8</strong></span>
+      <span id="saveStatus" style="margin-left: auto;">Sinkron otomatis...</span>
+    </div>
+
+    <div class="layout">
+      <!-- Division Rail Navigation -->
+      <nav class="rail" aria-label="Daftar divisi">
+        <p class="rail__caption">Pilih Divisi (10 Baris Max)</p>
+        <div class="rail__list" id="divisionRail"></div>
+      </nav>
+
+      <!-- Main Data Panel -->
+      <main class="panel">
+        <div class="panel__head">
+          <div>
+            <h2 class="panel__title" id="panelTitle">KETUA</h2>
+            <p class="panel__hint" id="panelHint">Memuat data divisi...</p>
+          </div>
+          <button class="btn btn--danger" id="clearDivisionButton">Kosongkan Divisi Ini</button>
+        </div>
+
+        <form id="entryForm" novalidate>
+          <div class="entry">
+            <div class="field">
+              <label for="itemName">Nama barang</label>
+              <input id="itemName" name="itemName" autocomplete="off" placeholder="mis. Palu sidang / Laptop" />
+            </div>
+            <div class="field">
+              <label for="itemQuantity">Jumlah</label>
+              <input id="itemQuantity" name="itemQuantity" type="number" min="1" step="1" value="1" />
+            </div>
+            <div class="field">
+              <label for="itemUnit">Satuan</label>
+              <select id="itemUnit" name="itemUnit"></select>
+            </div>
+            <div class="field">
+              <label for="itemSource">Sumber</label>
+              <select id="itemSource" name="itemSource"></select>
+            </div>
+            <div class="entry__submit">
+              <button class="btn btn--primary" type="submit" id="submitButton">+ Tambah</button>
+              <button class="btn btn--quiet" type="button" id="cancelEditButton" hidden>Batal</button>
+            </div>
+          </div>
+          <p class="entry__error" id="entryError" role="alert"></p>
+        </form>
+
+        <div id="tableContainer">
+          <div class="table-wrap" id="tableWrap"></div>
+        </div>
+        <div id="overflowNotice"></div>
+
+        <div class="panel__foot">
+          <button class="btn btn--quiet" id="previousDivisionButton">← Divisi Sebelumnya</button>
+          <button class="btn btn--quiet" id="nextDivisionButton">Divisi Berikutnya →</button>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    const DIVISIONS = [
+      "KETUA",
+      "SEKRETARIS",
+      "BENDAHARA",
+      "SIE ACARA",
+      "SIE KONSUMSI",
+      "SIE PERKAB",
+      "SIE PDD",
+      "SIE HUMAS",
+    ];
+
+    const UNITS = [
+      "buah",
+      "unit",
+      "set",
+      "paket",
+      "lembar",
+      "rim",
+      "dus",
+      "kotak",
+      "pak",
+      "rol",
+      "lusin",
+      "eksemplar",
+      "orang",
+    ];
+
+    const SOURCES = [
+      "Inventaris organisasi",
+      "Pinjam sekretariat",
+      "Pinjam kampus",
+      "Pinjam UKM lain",
+      "Milik panitia",
+      "Sewa",
+      "Beli",
+      "Pesan katering",
+    ];
+
+    const TEMPLATE_ROW_LIMIT = 10;
+    const STORAGE_KEY = "mubes_perlengkapan_v2";
+    const SHEET_NAME = "Data Peminjaman";
+    const SHEET_TITLE = "RENCANA ANGGARAN PELAKSANAAN PERLENGKAPAN MUBES";
+
+    // Supabase Cloud Backend Configuration
+    const SUPABASE_URL = "https://izzfapunrshgghrbhhpf.supabase.co";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6emZhcHVucnNoZ2docmJoaHBmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM5NTUzMzgsImV4cCI6MjA5OTUzMTMzOH0.TIgOngCo6R_7sKyw2h_nPthVNqO0H-5_TmOebtB0hyw";
+    const SB_HEADERS = {
+      "apikey": SUPABASE_KEY,
+      "Authorization": "Bearer " + SUPABASE_KEY,
+      "Content-Type": "application/json"
+    };
+
+    const createEmptyItems = () =>
+      DIVISIONS.reduce((items, division) => ({ ...items, [division]: [] }), {});
+
+    const state = {
+      items: createEmptyItems(),
+      activeDivision: DIVISIONS[0],
+      editingId: null,
+      isOnline: true
+    };
+
+    const elements = {
+      rail: document.getElementById("divisionRail"),
+      panelTitle: document.getElementById("panelTitle"),
+      panelHint: document.getElementById("panelHint"),
+      tableWrap: document.getElementById("tableWrap"),
+      overflowNotice: document.getElementById("overflowNotice"),
+      entryForm: document.getElementById("entryForm"),
+      itemName: document.getElementById("itemName"),
+      itemQuantity: document.getElementById("itemQuantity"),
+      itemUnit: document.getElementById("itemUnit"),
+      itemSource: document.getElementById("itemSource"),
+      submitButton: document.getElementById("submitButton"),
+      cancelEditButton: document.getElementById("cancelEditButton"),
+      entryError: document.getElementById("entryError"),
+      totalItems: document.getElementById("totalItems"),
+      filledDivisions: document.getElementById("filledDivisions"),
+      saveStatus: document.getElementById("saveStatus"),
+      cloudStatus: document.getElementById("cloudStatus"),
+      toast: document.getElementById("toast"),
+    };
+
+    // Cloud Persistence with Supabase & LocalStorage Fallback
+    const cloudStorage = {
+      async load() {
+        try {
+          const res = await fetch(
+            `${SUPABASE_URL}/rest/v1/wishes?name=eq.MUBES_DATA_V1&order=id.desc&limit=1`,
+            { headers: SB_HEADERS }
+          );
+          if (res.ok) {
+            const data = await res.json();
+            if (data && data.length > 0 && data[0].message) {
+              const parsed = JSON.parse(data[0].message);
+              state.isOnline = true;
+              return parsed;
+            }
+          }
+        } catch (e) {
+          console.warn("Supabase load fallback to local:", e);
+          state.isOnline = false;
+        }
+
+        // Fallback to LocalStorage
+        try {
+          const local = localStorage.getItem(STORAGE_KEY);
+          return local ? JSON.parse(local) : null;
+        } catch (e) {
+          return null;
+        }
+      },
+
+      async save(items) {
+        // Save to LocalStorage immediately
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+        } catch (e) {}
+
+        // Sync to Supabase Cloud so all users see it
+        try {
+          const res = await fetch(`${SUPABASE_URL}/rest/v1/wishes`, {
+            method: "POST",
+            headers: { ...SB_HEADERS, "Prefer": "return=minimal" },
+            body: JSON.stringify({
+              name: "MUBES_DATA_V1",
+              message: JSON.stringify(items)
+            })
+          });
+          state.isOnline = res.ok;
+          return res.ok;
+        } catch (e) {
+          console.warn("Supabase save failed:", e);
+          state.isOnline = false;
+          return false;
+        }
+      }
+    };
+
+    const createId = () => `item-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+
+    const countAllItems = () =>
+      DIVISIONS.reduce((total, division) => total + (state.items[division] ? state.items[division].length : 0), 0);
+
+    const countFilledDivisions = () =>
+      DIVISIONS.filter((division) => state.items[division] && state.items[division].length > 0).length;
+
+    const activeItems = () => state.items[state.activeDivision] || [];
+
+    function fillSelect(select, options) {
+      select.innerHTML = options
+        .map((option) => `<option value="${option}">${option}</option>`)
+        .join("");
+    }
+
+    function showToast(message) {
+      elements.toast.textContent = message;
+      elements.toast.classList.add("toast--visible");
+      window.clearTimeout(showToast.timer);
+      showToast.timer = window.setTimeout(
+        () => elements.toast.classList.remove("toast--visible"),
+        2600
+      );
+    }
+
+    async function persist(statusMessage) {
+      const savedCloud = await cloudStorage.save(state.items);
+      elements.cloudStatus.textContent = savedCloud ? "☁️ Cloud Sinkron (Publik)" : "📱 Tersimpan Lokal";
+      elements.saveStatus.textContent = `Tersimpan · ${new Date().toLocaleTimeString("id-ID")}`;
+      if (statusMessage) showToast(statusMessage);
+    }
+
+    function renderRail() {
+      const railItems = DIVISIONS.map((division) => {
+        const count = state.items[division] ? state.items[division].length : 0;
+        const ticks = Array.from({ length: TEMPLATE_ROW_LIMIT }, (_, index) =>
+          `<span class="meter__tick ${index < count ? "meter__tick--filled" : ""}"></span>`
+        ).join("");
+
+        return `
+          <button class="division" type="button" data-division="${division}"
+                  aria-current="${division === state.activeDivision}">
+            <span class="division__row">
+              <span class="division__name">${division}</span>
+              <span class="division__count">${count}/${TEMPLATE_ROW_LIMIT}</span>
+            </span>
+            <span class="meter">${ticks}</span>
+          </button>`;
+      }).join("");
+
+      elements.rail.innerHTML = railItems;
+    }
+
+    function renderTable() {
+      const items = activeItems();
+
+      if (items.length === 0) {
+        elements.tableWrap.innerHTML =
+          `<p class="empty">Belum ada barang untuk divisi <strong>${state.activeDivision}</strong>.<br>Tambahkan barang melalui formulir di atas.</p>`;
+        return;
+      }
+
+      const rows = items
+        .map(
+          (item, index) => `
+          <tr>
+            <td class="cell-no">${index + 1}</td>
+            <td><strong>${escapeHtml(item.name)}</strong></td>
+            <td class="cell-qty">${item.quantity} ${escapeHtml(item.unit)}</td>
+            <td><span class="source-badge">${escapeHtml(item.source)}</span></td>
+            <td>
+              <span class="row-actions">
+                <button type="button" data-action="edit" data-id="${item.id}">✏️ Ubah</button>
+                <button type="button" class="is-danger" data-action="delete" data-id="${item.id}">🗑️ Hapus</button>
+              </span>
+            </td>
+          </tr>`
+        )
+        .join("");
+
+      elements.tableWrap.innerHTML = `
+        <table>
+          <thead>
+            <tr>
+              <th style="width:48px">No</th>
+              <th>Nama Barang</th>
+              <th style="width:130px">Jumlah</th>
+              <th style="width:180px">Sumber</th>
+              <th style="width:140px; text-align:right;">Aksi</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>`;
+    }
+
+    function escapeHtml(text) {
+      return String(text || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    function renderOverflowNotice() {
+      const overflow = activeItems().length - TEMPLATE_ROW_LIMIT;
+      elements.overflowNotice.innerHTML =
+        overflow > 0
+          ? `<p style="margin-top:12px; padding:10px 12px; border-left:3px solid var(--amber); background:var(--amber-soft); font-size:13px; font-weight:600;">
+             ⚠️ Divisi ini memiliki ${overflow} barang lebih banyak dari template Excel (10 baris). Baris tambahan tetap akan di-export secara lengkap.
+             </p>`
+          : "";
+    }
+
+    function renderPanel() {
+      const count = activeItems().length;
+      elements.panelTitle.textContent = state.activeDivision;
+      elements.panelHint.textContent =
+        count === 0
+          ? "Belum ada barang yang dicatat."
+          : `${count} barang dicatat untuk divisi ini.`;
+      renderTable();
+      renderOverflowNotice();
+    }
+
+    function renderSummary() {
+      elements.totalItems.textContent = countAllItems();
+      elements.filledDivisions.textContent = `${countFilledDivisions()} / ${DIVISIONS.length}`;
+    }
+
+    function render() {
+      renderRail();
+      renderPanel();
+      renderSummary();
+    }
+
+    function resetForm() {
+      state.editingId = null;
+      elements.entryForm.reset();
+      elements.itemQuantity.value = 1;
+      elements.entryError.textContent = "";
+      elements.submitButton.textContent = "+ Tambah";
+      elements.cancelEditButton.hidden = true;
+    }
+
+    function readForm() {
+      return {
+        name: elements.itemName.value.trim(),
+        quantity: Number(elements.itemQuantity.value),
+        unit: elements.itemUnit.value,
+        source: elements.itemSource.value,
+      };
+    }
+
+    function validate({ name, quantity }) {
+      if (!name) return "Nama barang wajib diisi.";
+      if (!Number.isFinite(quantity) || quantity < 1) return "Jumlah minimal 1.";
+      return "";
+    }
+
+    function startEditing(id) {
+      const item = activeItems().find((candidate) => candidate.id === id);
+      if (!item) return;
+
+      state.editingId = id;
+      elements.itemName.value = item.name;
+      elements.itemQuantity.value = item.quantity;
+      elements.itemUnit.value = item.unit;
+      elements.itemSource.value = item.source;
+      elements.submitButton.textContent = "💾 Simpan";
+      elements.cancelEditButton.hidden = false;
+      elements.itemName.focus();
+    }
+
+    async function deleteItem(id) {
+      if (!confirm("Hapus barang ini dari divisi " + state.activeDivision + "?")) return;
+      state.items[state.activeDivision] = activeItems().filter((item) => item.id !== id);
+      if (state.editingId === id) resetForm();
+      render();
+      await persist("Barang dihapus");
+    }
+
+    async function handleSubmit(event) {
+      event.preventDefault();
+      const values = readForm();
+      const error = validate(values);
+      elements.entryError.textContent = error;
+      if (error) {
+        elements.itemName.focus();
+        return;
+      }
+
+      if (!state.items[state.activeDivision]) {
+        state.items[state.activeDivision] = [];
+      }
+
+      if (state.editingId) {
+        state.items[state.activeDivision] = activeItems().map((item) =>
+          item.id === state.editingId ? { ...item, ...values } : item
+        );
+        resetForm();
+        render();
+        await persist("Perubahan disimpan");
+        return;
+      }
+
+      state.items[state.activeDivision].push({ id: createId(), ...values });
+      resetForm();
+      render();
+      elements.itemName.focus();
+      await persist("Barang ditambahkan ke cloud");
+    }
+
+    function selectDivision(division) {
+      state.activeDivision = division;
+      resetForm();
+      render();
+      
+      // Auto-scroll selected button into view on mobile
+      const activeBtn = elements.rail.querySelector(`[data-division="${division}"]`);
+      if (activeBtn) {
+        activeBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+      }
+    }
+
+    function shiftDivision(step) {
+      const index = DIVISIONS.indexOf(state.activeDivision);
+      const nextIndex = (index + step + DIVISIONS.length) % DIVISIONS.length;
+      selectDivision(DIVISIONS[nextIndex]);
+    }
+
+    async function clearActiveDivision() {
+      if (activeItems().length === 0) return;
+      const confirmed = window.confirm(`Kosongkan seluruh barang di divisi ${state.activeDivision}?`);
+      if (!confirmed) return;
+
+      state.items[state.activeDivision] = [];
+      resetForm();
+      render();
+      await persist("Divisi dikosongkan");
+    }
+
+    function buildSheetMatrix() {
+      const matrix = [[], [SHEET_TITLE], ["NO", "NAMA BARANG", "JUMLAH BARANG", "SUMBER"]];
+      const merges = [
+        { s: { r: 1, c: 0 }, e: { r: 1, c: 3 } },
+        { s: { r: 2, c: 0 }, e: { r: 2, c: 0 } },
+      ];
+
+      DIVISIONS.forEach((division) => {
+        merges.push({
+          s: { r: matrix.length, c: 0 },
+          e: { r: matrix.length, c: 3 },
+        });
+        matrix.push([division]);
+
+        const items = state.items[division] || [];
+        items.forEach((item, index) => {
+          matrix.push([index + 1, item.name, `${item.quantity} ${item.unit}`, item.source]);
+        });
+      });
+
+      return { matrix, merges };
+    }
+
+    function downloadBlob(blob, filename) {
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      link.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function exportExcel() {
+      if (countAllItems() === 0) {
+        showToast("Belum ada barang untuk diunduh");
+        return;
+      }
+
+      const { matrix, merges } = buildSheetMatrix();
+      const sheet = XLSX.utils.aoa_to_sheet(matrix);
+      sheet["!cols"] = [{ wch: 6 }, { wch: 40 }, { wch: 20 }, { wch: 26 }];
+      sheet["!merges"] = merges;
+
+      const book = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(book, sheet, SHEET_NAME);
+      XLSX.writeFile(book, "Perlengkapan_MUBES.xlsx");
+      showToast("Berkas Excel berhasil diunduh");
+    }
+
+    function exportCsv() {
+      if (countAllItems() === 0) {
+        showToast("Belum ada barang untuk diunduh");
+        return;
+      }
+
+      const escapeCell = (value) => `"${String(value).replace(/"/g, '""')}"`;
+      const lines = [["DIVISI", "NO", "NAMA BARANG", "JUMLAH BARANG", "SUMBER"]];
+
+      DIVISIONS.forEach((division) => {
+        const items = state.items[division] || [];
+        items.forEach((item, index) => {
+          lines.push([division, index + 1, item.name, `${item.quantity} ${item.unit}`, item.source]);
+        });
+      });
+
+      const csv = lines.map((line) => line.map(escapeCell).join(",")).join("\r\n");
+      downloadBlob(new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8" }), "Perlengkapan_MUBES.csv");
+      showToast("Berkas CSV berhasil diunduh");
+    }
+
+    function handleRailClick(event) {
+      const button = event.target.closest("[data-division]");
+      if (button) selectDivision(button.dataset.division);
+    }
+
+    function handleTableClick(event) {
+      const button = event.target.closest("[data-action]");
+      if (!button) return;
+      if (button.dataset.action === "edit") startEditing(button.dataset.id);
+      if (button.dataset.action === "delete") deleteItem(button.dataset.id);
+    }
+
+    async function restoreSavedItems() {
+      const saved = await cloudStorage.load();
+      if (!saved) return;
+
+      DIVISIONS.forEach((division) => {
+        if (Array.isArray(saved[division])) state.items[division] = saved[division];
+      });
+      elements.saveStatus.textContent = "Data cloud terbaru dimuat";
+      elements.cloudStatus.textContent = "☁️ Terhubung ke Cloud";
+    }
+
+    // Auto sync polling every 10 seconds for real-time collaboration
+    function startAutoSync() {
+      setInterval(async () => {
+        const cloudData = await cloudStorage.load();
+        if (cloudData) {
+          let updated = false;
+          DIVISIONS.forEach((div) => {
+            if (JSON.stringify(state.items[div]) !== JSON.stringify(cloudData[div])) {
+              if (Array.isArray(cloudData[div])) {
+                state.items[div] = cloudData[div];
+                updated = true;
+              }
+            }
+          });
+          if (updated) {
+            render();
+            elements.saveStatus.textContent = `Disinkronkan · ${new Date().toLocaleTimeString("id-ID")}`;
+          }
+        }
+      }, 10000);
+    }
+
+    async function start() {
+      fillSelect(elements.itemUnit, UNITS);
+      fillSelect(elements.itemSource, SOURCES);
+
+      elements.entryForm.addEventListener("submit", handleSubmit);
+      elements.cancelEditButton.addEventListener("click", resetForm);
+      elements.rail.addEventListener("click", handleRailClick);
+      elements.tableWrap.addEventListener("click", handleTableClick);
+      document.getElementById("clearDivisionButton").addEventListener("click", clearActiveDivision);
+      document.getElementById("exportExcelButton").addEventListener("click", exportExcel);
+      document.getElementById("exportCsvButton").addEventListener("click", exportCsv);
+      document.getElementById("previousDivisionButton").addEventListener("click", () => shiftDivision(-1));
+      document.getElementById("nextDivisionButton").addEventListener("click", () => shiftDivision(1));
+
+      await restoreSavedItems();
+      render();
+      startAutoSync();
+    }
+
+    start();
+  </script>
+</body>
+</html>
