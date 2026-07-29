@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <title>Perlengkapan MUBES — Formulir Rencana Anggaran</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -61,24 +61,24 @@
     .shell {
       max-width: 1140px;
       margin: 0 auto;
-      padding: 24px 16px 64px;
+      padding: max(16px, env(safe-area-inset-top, 16px)) 16px max(32px, env(safe-area-inset-bottom, 32px));
     }
 
     /* Masthead Header */
     .masthead {
       border-bottom: 2px solid var(--ink);
-      padding-bottom: 18px;
+      padding-bottom: 16px;
       display: flex;
       flex-wrap: wrap;
       align-items: flex-end;
       justify-content: space-between;
-      gap: 16px;
+      gap: 14px;
     }
 
     .masthead__eyebrow {
       font-family: var(--mono);
       font-size: 11px;
-      letter-spacing: 0.16em;
+      letter-spacing: 0.12em;
       text-transform: uppercase;
       color: var(--pine);
       font-weight: 600;
@@ -86,13 +86,15 @@
       display: flex;
       align-items: center;
       gap: 6px;
+      flex-wrap: wrap;
+      line-height: 1.3;
     }
 
     .masthead__title {
       font-family: var(--display);
       font-weight: 800;
-      font-size: clamp(22px, 5vw, 36px);
-      line-height: 1.05;
+      font-size: clamp(20px, 5vw, 36px);
+      line-height: 1.08;
       letter-spacing: -0.02em;
       text-transform: uppercase;
       margin: 0;
@@ -104,14 +106,15 @@
     }
 
     .masthead__actions {
-      display: flex;
-      flex-wrap: wrap;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
       gap: 10px;
       width: 100%;
     }
 
     @media (min-width: 640px) {
       .masthead__actions {
+        display: flex;
         width: auto;
       }
     }
@@ -119,7 +122,7 @@
     .btn {
       border: 1.5px solid var(--ink);
       background: #ffffff;
-      padding: 10px 16px;
+      padding: 10px 14px;
       border-radius: var(--radius);
       cursor: pointer;
       font-weight: 700;
@@ -176,17 +179,25 @@
       color: #ffffff;
     }
 
-    /* Statusbar Bar */
+    /* Statusbar Bar - Mobile Optimized */
     .statusbar {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px 20px;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px 14px;
       align-items: center;
       padding: 12px 0;
       font-family: var(--mono);
       font-size: 12px;
       color: var(--ink-soft);
       border-bottom: 1px solid var(--line);
+    }
+
+    @media (min-width: 640px) {
+      .statusbar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px 24px;
+      }
     }
 
     .statusbar__badge {
@@ -198,6 +209,8 @@
       border-radius: 99px;
       color: var(--ink);
       font-weight: 600;
+      white-space: nowrap;
+      width: fit-content;
     }
 
     .statusbar__pulse {
@@ -207,6 +220,7 @@
       background: #22c55e;
       box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4);
       animation: pulse 2s infinite;
+      flex-shrink: 0;
     }
 
     @keyframes pulse {
@@ -220,12 +234,24 @@
       font-weight: 700;
     }
 
+    .statusbar__time {
+      grid-column: span 2;
+      font-size: 11px;
+    }
+
+    @media (min-width: 640px) {
+      .statusbar__time {
+        margin-left: auto;
+        font-size: 12px;
+      }
+    }
+
     /* Layout & Sidebar Rail */
     .layout {
       display: grid;
       grid-template-columns: 1fr;
       gap: var(--gap);
-      margin-top: 18px;
+      margin-top: 16px;
       align-items: start;
     }
 
@@ -253,10 +279,10 @@
     .rail__caption {
       font-family: var(--mono);
       font-size: 11px;
-      letter-spacing: 0.14em;
+      letter-spacing: 0.12em;
       text-transform: uppercase;
       color: var(--ink-soft);
-      padding: 6px 8px 10px;
+      padding: 4px 8px 8px;
       margin: 0;
       font-weight: 600;
     }
@@ -265,10 +291,15 @@
       display: flex;
       flex-wrap: nowrap;
       overflow-x: auto;
-      gap: 6px;
-      padding-bottom: 4px;
+      gap: 8px;
+      padding: 2px 2px 6px;
       -webkit-overflow-scrolling: touch;
-      scrollbar-width: thin;
+      scrollbar-width: none; /* Firefox */
+      -ms-overflow-style: none; /* IE/Edge */
+    }
+
+    .rail__list::-webkit-scrollbar {
+      display: none; /* Chrome/Safari */
     }
 
     @media (min-width: 860px) {
@@ -378,7 +409,7 @@
       background: var(--panel);
       border: 1px solid var(--line);
       border-radius: var(--radius);
-      padding: 18px;
+      padding: 16px;
       box-shadow: var(--shadow);
     }
 
@@ -395,8 +426,8 @@
       align-items: center;
       justify-content: space-between;
       border-bottom: 1.5px solid var(--line);
-      padding-bottom: 14px;
-      margin-bottom: 20px;
+      padding-bottom: 12px;
+      margin-bottom: 18px;
     }
 
     .panel__title {
@@ -418,10 +449,10 @@
     .entry {
       display: grid;
       grid-template-columns: 1fr;
-      gap: 14px;
+      gap: 12px;
       align-items: end;
       background: #f9fbf7;
-      padding: 16px;
+      padding: 14px;
       border: 1px solid var(--line);
       border-radius: var(--radius);
     }
@@ -430,13 +461,14 @@
       .entry {
         grid-template-columns: 2fr 100px 1fr 1.3fr auto;
         gap: 10px;
+        padding: 16px;
       }
     }
 
     .field {
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 5px;
       min-width: 0;
     }
 
@@ -487,24 +519,25 @@
     .entry__error {
       color: var(--danger);
       font-size: 13px;
-      margin: 10px 0 0;
+      margin: 8px 0 0;
       min-height: 20px;
       font-weight: 600;
     }
 
     /* Table & Card List */
     .table-wrap {
-      margin-top: 18px;
+      margin-top: 16px;
       overflow-x: auto;
       border: 1px solid var(--line);
       border-radius: var(--radius);
+      -webkit-overflow-scrolling: touch;
     }
 
     table {
       width: 100%;
       border-collapse: collapse;
       font-size: 14px;
-      min-width: 580px;
+      min-width: 540px;
     }
 
     th {
@@ -588,11 +621,11 @@
     .empty {
       border: 2px dashed var(--line);
       border-radius: var(--radius);
-      padding: 36px 20px;
+      padding: 32px 16px;
       text-align: center;
       color: var(--ink-soft);
       font-size: 14px;
-      margin-top: 18px;
+      margin-top: 16px;
     }
 
     .panel__foot {
@@ -600,8 +633,8 @@
       flex-wrap: wrap;
       justify-content: space-between;
       gap: 10px;
-      margin-top: 20px;
-      padding-top: 16px;
+      margin-top: 18px;
+      padding-top: 14px;
       border-top: 1.5px solid var(--line);
     }
 
@@ -656,11 +689,11 @@
     <header class="masthead">
       <div>
         <p class="masthead__eyebrow">
-          <span>🏛️</span> Panitia Musyawarah Besar (MUBES)
+          <span>🏛️</span> PANITIA MUSYAWARAH BESAR (MUBES)
         </p>
         <h1 class="masthead__title">
-          Rencana Anggaran
-          <span>Perlengkapan MUBES</span>
+          RENCANA ANGGARAN
+          <span>PERLENGKAPAN MUBES</span>
         </h1>
       </div>
       <div class="masthead__actions">
@@ -676,13 +709,13 @@
       </div>
       <span>Total barang: <strong id="totalItems">0</strong></span>
       <span>Divisi terisi: <strong id="filledDivisions">0 / 8</strong></span>
-      <span id="saveStatus" style="margin-left: auto;">Sinkron otomatis...</span>
+      <span class="statusbar__time" id="saveStatus">Sinkron otomatis...</span>
     </div>
 
     <div class="layout">
       <!-- Division Rail Navigation -->
       <nav class="rail" aria-label="Daftar divisi">
-        <p class="rail__caption">Pilih Divisi (10 Baris Max)</p>
+        <p class="rail__caption">PILIH DIVISI (10 BARIS MAX)</p>
         <div class="rail__list" id="divisionRail"></div>
       </nav>
 
@@ -905,7 +938,7 @@
 
     async function persist(statusMessage) {
       const savedCloud = await cloudStorage.save(state.items);
-      elements.cloudStatus.textContent = savedCloud ? "☁️ Cloud Sinkron (Publik)" : "📱 Tersimpan Lokal";
+      elements.cloudStatus.textContent = savedCloud ? "Terhubung ke Cloud" : "Tersimpan Lokal";
       elements.saveStatus.textContent = `Tersimpan · ${new Date().toLocaleTimeString("id-ID")}`;
       if (statusMessage) showToast(statusMessage);
     }
@@ -1209,7 +1242,7 @@
         if (Array.isArray(saved[division])) state.items[division] = saved[division];
       });
       elements.saveStatus.textContent = "Data cloud terbaru dimuat";
-      elements.cloudStatus.textContent = "☁️ Terhubung ke Cloud";
+      elements.cloudStatus.textContent = "Terhubung ke Cloud";
     }
 
     // Auto sync polling every 10 seconds for real-time collaboration
