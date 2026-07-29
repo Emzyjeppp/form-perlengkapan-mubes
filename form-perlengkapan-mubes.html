@@ -282,7 +282,7 @@
       letter-spacing: 0.12em;
       text-transform: uppercase;
       color: var(--ink-soft);
-      padding: 0 0 8px;
+      padding: 0 0 10px;
       margin: 0;
       font-weight: 600;
     }
@@ -314,7 +314,7 @@
       background: #f8faf6;
       border: 1.5px solid var(--line);
       border-radius: var(--radius);
-      padding: 8px 10px;
+      padding: 10px 12px;
       cursor: pointer;
       transition: all 0.15s ease;
       touch-action: manipulation;
@@ -347,15 +347,19 @@
       }
     }
 
-    .division[aria-current="true"] .division__name,
-    .division[aria-current="true"] .division__count {
+    .division[aria-current="true"] .division__name {
       color: #ffffff;
+    }
+
+    .division[aria-current="true"] .division__count {
+      color: var(--pine);
+      background: var(--amber);
     }
 
     .division__row {
       display: flex;
       justify-content: space-between;
-      align-items: baseline;
+      align-items: center;
       gap: 4px;
     }
 
@@ -375,34 +379,13 @@
 
     .division__count {
       font-family: var(--mono);
-      font-size: 10px;
+      font-size: 11px;
       color: var(--ink-soft);
       font-weight: 600;
-    }
-
-    .meter {
-      display: flex;
-      gap: 2px;
-      margin-top: 6px;
-    }
-
-    .meter__tick {
-      height: 4px;
-      flex: 1;
-      background: var(--line);
-      border-radius: 2px;
-    }
-
-    .meter__tick--filled {
-      background: var(--amber);
-    }
-
-    .division[aria-current="true"] .meter__tick {
-      background: rgba(255, 255, 255, 0.3);
-    }
-
-    .division[aria-current="true"] .meter__tick--filled {
-      background: var(--amber);
+      background: rgba(0, 0, 0, 0.06);
+      padding: 2px 6px;
+      border-radius: 4px;
+      white-space: nowrap;
     }
 
     /* Main Panel & Forms */
@@ -716,7 +699,7 @@
     <div class="layout">
       <!-- Division Rail Navigation -->
       <nav class="rail" aria-label="Daftar divisi">
-        <p class="rail__caption">PILIH DIVISI (10 BARIS MAX)</p>
+        <p class="rail__caption">PILIH DIVISI</p>
         <div class="rail__list" id="divisionRail"></div>
       </nav>
 
@@ -759,7 +742,6 @@
         <div id="tableContainer">
           <div class="table-wrap" id="tableWrap"></div>
         </div>
-        <div id="overflowNotice"></div>
 
         <div class="panel__foot">
           <button class="btn btn--quiet" id="previousDivisionButton">← Divisi Sebelumnya</button>
@@ -810,7 +792,6 @@
       "Pesan katering",
     ];
 
-    const TEMPLATE_ROW_LIMIT = 10;
     const STORAGE_KEY = "mubes_perlengkapan_v2";
     const SHEET_NAME = "Data Peminjaman";
     const SHEET_TITLE = "RENCANA ANGGARAN PELAKSANAAN PERLENGKAPAN MUBES";
@@ -839,7 +820,6 @@
       panelTitle: document.getElementById("panelTitle"),
       panelHint: document.getElementById("panelHint"),
       tableWrap: document.getElementById("tableWrap"),
-      overflowNotice: document.getElementById("overflowNotice"),
       entryForm: document.getElementById("entryForm"),
       itemName: document.getElementById("itemName"),
       itemQuantity: document.getElementById("itemQuantity"),
@@ -947,18 +927,13 @@
     function renderRail() {
       const railItems = DIVISIONS.map((division) => {
         const count = state.items[division] ? state.items[division].length : 0;
-        const ticks = Array.from({ length: TEMPLATE_ROW_LIMIT }, (_, index) =>
-          `<span class="meter__tick ${index < count ? "meter__tick--filled" : ""}"></span>`
-        ).join("");
-
         return `
           <button class="division" type="button" data-division="${division}"
                   aria-current="${division === state.activeDivision}">
             <span class="division__row">
               <span class="division__name">${division}</span>
-              <span class="division__count">${count}/${TEMPLATE_ROW_LIMIT}</span>
+              <span class="division__count">${count} barang</span>
             </span>
-            <span class="meter">${ticks}</span>
           </button>`;
       }).join("");
 
@@ -1015,16 +990,6 @@
         .replace(/"/g, "&quot;");
     }
 
-    function renderOverflowNotice() {
-      const overflow = activeItems().length - TEMPLATE_ROW_LIMIT;
-      elements.overflowNotice.innerHTML =
-        overflow > 0
-          ? `<p style="margin-top:12px; padding:10px 12px; border-left:3px solid var(--amber); background:var(--amber-soft); font-size:13px; font-weight:600;">
-             ⚠️ Divisi ini memiliki ${overflow} barang lebih banyak dari template Excel (10 baris). Baris tambahan tetap akan di-export secara lengkap.
-             </p>`
-          : "";
-    }
-
     function renderPanel() {
       const count = activeItems().length;
       elements.panelTitle.textContent = state.activeDivision;
@@ -1033,7 +998,6 @@
           ? "Belum ada barang yang dicatat."
           : `${count} barang dicatat untuk divisi ini.`;
       renderTable();
-      renderOverflowNotice();
     }
 
     function renderSummary() {
