@@ -126,7 +126,7 @@
     .btn {
       border: 1.5px solid var(--ink);
       background: #ffffff;
-      padding: 10px 14px;
+      padding: 10px 16px;
       border-radius: var(--radius);
       cursor: pointer;
       font-weight: 700;
@@ -273,7 +273,7 @@
     }
 
     .toolbar__search {
-      flex: 1 1 200px;
+      flex: 1 1 240px;
       position: relative;
     }
 
@@ -310,10 +310,11 @@
     .toolbar__filter select {
       border: 1.5px solid var(--line);
       border-radius: var(--radius);
-      padding: 9px 10px;
+      padding: 9px 12px;
       font-size: 13px;
       background: #ffffff;
       font-weight: 600;
+      min-width: 160px;
     }
 
     /* Layout & Sidebar Rail */
@@ -511,46 +512,77 @@
       border-radius: 6px;
     }
 
+    /* SPACIOUS 2-ROW FORM GRID FOR DESKTOP & MOBILE */
     .entry {
       display: grid;
       grid-template-columns: 1fr;
       gap: 12px;
       align-items: end;
       background: #f9fbf7;
-      padding: 14px;
+      padding: 16px;
       border: 1px solid var(--line);
       border-radius: var(--radius);
     }
 
     @media (min-width: 640px) {
       .entry {
-        grid-template-columns: 2.2fr 80px 100px 1.2fr 130px 1.3fr auto;
-        gap: 8px;
-        padding: 16px;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 14px 16px;
+        padding: 20px;
+      }
+
+      .entry__field--name {
+        grid-column: span 2;
+      }
+
+      .entry__field--qty {
+        grid-column: span 1;
+      }
+
+      .entry__field--unit {
+        grid-column: span 1;
+      }
+
+      .entry__field--source {
+        grid-column: span 1;
+      }
+
+      .entry__field--price {
+        grid-column: span 1;
+      }
+
+      .entry__field--status {
+        grid-column: span 1;
+      }
+
+      .entry__submit {
+        grid-column: span 1;
+        align-self: end;
       }
     }
 
     .field {
       display: flex;
       flex-direction: column;
-      gap: 5px;
+      gap: 6px;
       min-width: 0;
     }
 
     .field label {
       font-family: var(--mono);
       font-size: 11px;
-      letter-spacing: 0.1em;
+      letter-spacing: 0.08em;
       text-transform: uppercase;
       color: var(--ink-soft);
       font-weight: 600;
+      white-space: nowrap;
     }
 
     .field input,
     .field select {
       border: 1.5px solid var(--line);
       border-radius: var(--radius);
-      padding: 10px 10px;
+      padding: 10px 12px;
       background: #ffffff;
       width: 100%;
       font-size: 14px;
@@ -567,18 +599,11 @@
       display: flex;
       gap: 8px;
       width: 100%;
-      margin-top: 4px;
-    }
-
-    @media (min-width: 640px) {
-      .entry__submit {
-        width: auto;
-        margin-top: 0;
-      }
     }
 
     .entry__submit .btn {
       flex: 1;
+      min-height: 44px;
     }
 
     .entry__error {
@@ -602,7 +627,7 @@
       width: 100%;
       border-collapse: collapse;
       font-size: 14px;
-      min-width: 680px;
+      min-width: 720px;
     }
 
     th {
@@ -857,27 +882,28 @@
 
         <form id="entryForm" novalidate>
           <div class="entry">
-            <div class="field">
+            <div class="field entry__field--name">
               <label for="itemName">Nama barang</label>
               <input id="itemName" name="itemName" autocomplete="off" placeholder="mis. Palu sidang / Laptop" />
             </div>
-            <div class="field">
+            <div class="field entry__field--qty">
               <label for="itemQuantity">Jumlah</label>
               <input id="itemQuantity" name="itemQuantity" type="number" min="1" step="1" value="1" />
             </div>
-            <div class="field">
+            <div class="field entry__field--unit">
               <label for="itemUnit">Satuan</label>
               <select id="itemUnit" name="itemUnit"></select>
             </div>
-            <div class="field">
+
+            <div class="field entry__field--source">
               <label for="itemSource">Sumber</label>
               <select id="itemSource" name="itemSource"></select>
             </div>
-            <div class="field">
+            <div class="field entry__field--price">
               <label for="itemPrice">Harga/Satuan (Rp)</label>
               <input id="itemPrice" name="itemPrice" type="number" min="0" step="500" value="0" placeholder="0" />
             </div>
-            <div class="field">
+            <div class="field entry__field--status">
               <label for="itemStatus">Status</label>
               <select id="itemStatus" name="itemStatus">
                 <option value="Belum Ada">🔴 Belum Ada</option>
@@ -1204,7 +1230,7 @@
               <th style="width:150px">Sumber</th>
               <th style="width:130px">Harga Satuan</th>
               <th style="width:130px">Total Biaya</th>
-              <th style="width:130px">Status KESIAPAN</th>
+              <th style="width:130px">Status Kesiapan</th>
               <th style="width:130px; text-align:right;">Aksi</th>
             </tr>
           </thead>
