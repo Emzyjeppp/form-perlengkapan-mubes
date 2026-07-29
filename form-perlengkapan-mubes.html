@@ -61,7 +61,7 @@
     .shell {
       max-width: 1140px;
       margin: 0 auto;
-      padding: max(16px, env(safe-area-inset-top, 16px)) 16px max(32px, env(safe-area-inset-bottom, 32px));
+      padding: max(32px, env(safe-area-inset-top, 32px)) 16px max(32px, env(safe-area-inset-bottom, 32px));
     }
 
     /* Masthead Header */
@@ -265,7 +265,7 @@
       background: var(--panel);
       border: 1px solid var(--line);
       border-radius: var(--radius);
-      padding: 10px;
+      padding: 12px;
       box-shadow: var(--shadow);
     }
 
@@ -282,42 +282,39 @@
       letter-spacing: 0.12em;
       text-transform: uppercase;
       color: var(--ink-soft);
-      padding: 4px 8px 8px;
+      padding: 0 0 8px;
       margin: 0;
       font-weight: 600;
     }
 
+    /* NO-SWIPE Mobile Grid Layout: 2 Columns on mobile, 4 Columns on tablet, 1 Column vertical list on desktop */
     .rail__list {
-      display: flex;
-      flex-wrap: nowrap;
-      overflow-x: auto;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
       gap: 8px;
-      padding: 2px 2px 6px;
-      -webkit-overflow-scrolling: touch;
-      scrollbar-width: none; /* Firefox */
-      -ms-overflow-style: none; /* IE/Edge */
     }
 
-    .rail__list::-webkit-scrollbar {
-      display: none; /* Chrome/Safari */
+    @media (min-width: 520px) and (max-width: 859px) {
+      .rail__list {
+        grid-template-columns: repeat(4, 1fr);
+      }
     }
 
     @media (min-width: 860px) {
       .rail__list {
+        display: flex;
         flex-direction: column;
-        overflow-x: visible;
-        padding-bottom: 0;
+        gap: 6px;
       }
     }
 
     .division {
-      flex: 0 0 auto;
-      width: 145px;
+      width: 100%;
       text-align: left;
       background: #f8faf6;
       border: 1.5px solid var(--line);
       border-radius: var(--radius);
-      padding: 10px 12px;
+      padding: 8px 10px;
       cursor: pointer;
       transition: all 0.15s ease;
       touch-action: manipulation;
@@ -325,12 +322,10 @@
 
     @media (min-width: 860px) {
       .division {
-        width: 100%;
         border-left: 4px solid transparent;
         border-top: none;
         border-right: none;
         border-bottom: none;
-        border-radius: var(--radius);
         background: transparent;
       }
     }
@@ -361,28 +356,34 @@
       display: flex;
       justify-content: space-between;
       align-items: baseline;
-      gap: 6px;
+      gap: 4px;
     }
 
     .division__name {
       font-family: var(--display);
       font-weight: 700;
-      font-size: 13px;
-      letter-spacing: 0.02em;
+      font-size: 12px;
+      letter-spacing: 0.01em;
       text-transform: uppercase;
+    }
+
+    @media (min-width: 640px) {
+      .division__name {
+        font-size: 13px;
+      }
     }
 
     .division__count {
       font-family: var(--mono);
-      font-size: 11px;
+      font-size: 10px;
       color: var(--ink-soft);
       font-weight: 600;
     }
 
     .meter {
       display: flex;
-      gap: 3px;
-      margin-top: 8px;
+      gap: 2px;
+      margin-top: 6px;
     }
 
     .meter__tick {
@@ -1127,12 +1128,6 @@
       state.activeDivision = division;
       resetForm();
       render();
-      
-      // Auto-scroll selected button into view on mobile
-      const activeBtn = elements.rail.querySelector(`[data-division="${division}"]`);
-      if (activeBtn) {
-        activeBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-      }
     }
 
     function shiftDivision(step) {
