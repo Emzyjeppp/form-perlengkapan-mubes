@@ -854,6 +854,13 @@
       <div class="toolbar__filter">
         <select id="filterSource">
           <option value="">Semua Sumber</option>
+          <option value="HIMAFORKA">HIMAFORKA</option>
+          <option value="Kerumahtanggaaan">Kerumahtanggaaan</option>
+          <option value="Kemahasiswaan">Kemahasiswaan</option>
+          <option value="Panitia">Panitia</option>
+          <option value="Panitia (Jefri)">Panitia (Jefri)</option>
+          <option value="Panitia (Widya)">Panitia (Widya)</option>
+          <option value="UKM WAMIKA">UKM WAMIKA</option>
           <option value="Inventaris organisasi">Inventaris organisasi</option>
           <option value="Pinjam sekretariat">Pinjam sekretariat</option>
           <option value="Pinjam kampus">Pinjam kampus</option>
@@ -973,6 +980,13 @@
     ];
 
     const SOURCES = [
+      "HIMAFORKA",
+      "Kerumahtanggaaan",
+      "Kemahasiswaan",
+      "Panitia",
+      "Panitia (Jefri)",
+      "Panitia (Widya)",
+      "UKM WAMIKA",
       "Inventaris organisasi",
       "Pinjam sekretariat",
       "Pinjam kampus",
@@ -983,7 +997,7 @@
       "Pesan katering",
     ];
 
-    const STORAGE_KEY = "mubes_perlengkapan_v3";
+    const STORAGE_KEY = "mubes_perlengkapan_v4";
     const SHEET_NAME = "Data Peminjaman";
     const SHEET_TITLE = "RENCANA ANGGARAN PELAKSANAAN PERLENGKAPAN MUBES";
 
@@ -995,6 +1009,8 @@
       "Authorization": "Bearer " + SUPABASE_KEY,
       "Content-Type": "application/json"
     };
+
+    const PREFIX = "MUBES_V4_";
 
     const createEmptyItems = () =>
       DIVISIONS.reduce((items, division) => ({ ...items, [division]: [] }), {});
@@ -1045,25 +1061,47 @@
       }).format(number || 0);
     };
 
-    // Cloud Persistence with Supabase & LocalStorage Fallback
+    // Cloud Persistence with Supabase & LocalStorage Fallback (Chunked V4 Format)
     const cloudStorage = {
       async load() {
         try {
           const res = await fetch(
-            `${SUPABASE_URL}/rest/v1/wishes?name=eq.MUBES_DATA_V2&order=id.desc&limit=1`,
+            `${SUPABASE_URL}/rest/v1/wishes?name=like.${PREFIX}%25&order=id.desc`,
             { headers: SB_HEADERS }
           );
+
           if (res.ok) {
-            const data = await res.json();
-            if (data && data.length > 0 && data[0].message) {
-              const parsed = JSON.parse(data[0].message);
-              state.isOnline = true;
-              return parsed;
+            const rows = await res.json();
+            if (rows && rows.length > 0) {
+              const loadedItems = createEmptyItems();
+              let hasData = false;
+
+              rows.forEach((row) => {
+                if (!row.name || !row.message) return;
+                const rawName = row.name.replace(PREFIX, "");
+                const lastUnderscore = rawName.lastIndexOf("_");
+                if (lastUnderscore === -1) return;
+
+                const divName = rawName.slice(0, lastUnderscore);
+                if (DIVISIONS.includes(divName)) {
+                  try {
+                    const chunkItems = JSON.parse(row.message);
+                    if (Array.isArray(chunkItems)) {
+                      loadedItems[divName].push(...chunkItems);
+                      hasData = true;
+                    }
+                  } catch (e) {}
+                }
+              });
+
+              if (hasData) {
+                state.isOnline = true;
+                return loadedItems;
+              }
             }
           }
         } catch (e) {
-          console.warn("Supabase load fallback to local:", e);
-          state.isOnline = false;
+          console.warn("Supabase load failed, fallback:", e);
         }
 
         // Fallback to LocalStorage
@@ -1076,23 +1114,41 @@
       },
 
       async save(items) {
-        // Save to LocalStorage immediately
         try {
           localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
         } catch (e) {}
 
-        // Sync to Supabase Cloud so all users see it
         try {
-          const res = await fetch(`${SUPABASE_URL}/rest/v1/wishes`, {
-            method: "POST",
-            headers: { ...SB_HEADERS, "Prefer": "return=minimal" },
-            body: JSON.stringify({
-              name: "MUBES_DATA_V2",
-              message: JSON.stringify(items)
-            })
-          });
-          state.isOnline = res.ok;
-          return res.ok;
+          const chunkSize = 2;
+          let allSuccess = true;
+
+          for (const div of DIVISIONS) {
+            const list = items[div] || [];
+            if (list.length === 0) {
+              const res = await fetch(`${SUPABASE_URL}/rest/v1/wishes`, {
+                method: "POST",
+                headers: { ...SB_HEADERS, "Prefer": "return=minimal" },
+                body: JSON.stringify({ name: `${PREFIX}${div}_0`, message: "[]" })
+              });
+              if (!res.ok) allSuccess = false;
+            } else {
+              for (let i = 0; i < list.length; i += chunkSize) {
+                const chunk = list.slice(i, i + chunkSize);
+                const res = await fetch(`${SUPABASE_URL}/rest/v1/wishes`, {
+                  method: "POST",
+                  headers: { ...SB_HEADERS, "Prefer": "return=minimal" },
+                  body: JSON.stringify({
+                    name: `${PREFIX}${div}_${Math.floor(i / chunkSize)}`,
+                    message: JSON.stringify(chunk)
+                  })
+                });
+                if (!res.ok) allSuccess = false;
+              }
+            }
+          }
+
+          state.isOnline = allSuccess;
+          return allSuccess;
         } catch (e) {
           console.warn("Supabase save failed:", e);
           state.isOnline = false;
