@@ -997,7 +997,7 @@
       "Pesan katering",
     ];
 
-    const STORAGE_KEY = "mubes_perlengkapan_v4";
+    const STORAGE_KEY = "mubes_perlengkapan_v5";
     const SHEET_NAME = "Data Peminjaman";
     const SHEET_TITLE = "RENCANA ANGGARAN PELAKSANAAN PERLENGKAPAN MUBES";
 
@@ -1021,6 +1021,7 @@
       editingId: null,
       editingDivision: null,
       isOnline: true,
+      isSaving: false,
       searchQuery: "",
       filterSource: "",
       filterStatus: ""
@@ -1061,7 +1062,7 @@
       }).format(number || 0);
     };
 
-    // Cloud Persistence with Supabase & LocalStorage Fallback (Chunked V4 Format)
+    // Cloud Persistence with Strict Deduplication (Strict 1-Record per Chunk & Item ID)
     const cloudStorage = {
       async load() {
         try {
@@ -1074,10 +1075,16 @@
             const rows = await res.json();
             if (rows && rows.length > 0) {
               const loadedItems = createEmptyItems();
+              const seenChunkNames = new Set();
+              const seenItemIds = new Set();
               let hasData = false;
 
+              // Only read the LATEST row for each chunk name (order=id.desc)
               rows.forEach((row) => {
                 if (!row.name || !row.message) return;
+                if (seenChunkNames.has(row.name)) return; // Ignore older historical duplicates!
+                seenChunkNames.add(row.name);
+
                 const rawName = row.name.replace(PREFIX, "");
                 const lastUnderscore = rawName.lastIndexOf("_");
                 if (lastUnderscore === -1) return;
@@ -1087,8 +1094,15 @@
                   try {
                     const chunkItems = JSON.parse(row.message);
                     if (Array.isArray(chunkItems)) {
-                      loadedItems[divName].push(...chunkItems);
-                      hasData = true;
+                      chunkItems.forEach((item) => {
+                        // Strict deduplication by item.id and item signature
+                        const key = item.id || `${item.name}-${item.source}-${item.quantity}`;
+                        if (!seenItemIds.has(key)) {
+                          seenItemIds.add(key);
+                          loadedItems[divName].push(item);
+                          hasData = true;
+                        }
+                      });
                     }
                   } catch (e) {}
                 }
@@ -1114,6 +1128,9 @@
       },
 
       async save(items) {
+        if (state.isSaving) return true;
+        state.isSaving = true;
+
         try {
           localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
         } catch (e) {}
@@ -1148,10 +1165,12 @@
           }
 
           state.isOnline = allSuccess;
+          state.isSaving = false;
           return allSuccess;
         } catch (e) {
           console.warn("Supabase save failed:", e);
           state.isOnline = false;
+          state.isSaving = false;
           return false;
         }
       }
@@ -1607,9 +1626,10 @@
       elements.cloudStatus.textContent = "Terhubung ke Cloud";
     }
 
-    // Auto sync polling every 10 seconds for real-time collaboration
+    // Auto sync polling every 12 seconds for real-time collaboration
     function startAutoSync() {
       setInterval(async () => {
+        if (state.isSaving || state.editingId) return; // Skip sync while editing or saving
         const cloudData = await cloudStorage.load();
         if (cloudData) {
           let updated = false;
@@ -1626,7 +1646,7 @@
             elements.saveStatus.textContent = `Disinkronkan · ${new Date().toLocaleTimeString("id-ID")}`;
           }
         }
-      }, 10000);
+      }, 12000);
     }
 
     async function start() {
